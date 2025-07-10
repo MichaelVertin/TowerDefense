@@ -41,11 +41,6 @@ public class Player : MonoBehaviour
                         }
                     }
                 }
-                else
-                {
-                    Turret turret = turretPos.DetachTurret();
-                    Destroy(turret.gameObject);
-                }
             }
         }
     }

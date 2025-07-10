@@ -7,12 +7,13 @@ public abstract class Turret : MonoBehaviour
 {
     [SerializeField] float fireRate;
     [SerializeField] float damage;
-    [SerializeField] public int price;
-    TurretRange __range;
+    private TurretRange __range;
+    private TurretAttackVisual __attackVisual;
 
     public void Awake()
     {
         __range = GetComponentInChildren<TurretRange>();
+        __attackVisual = GetComponentInChildren<TurretAttackVisual>();
 
         StartCoroutine(Attack_Coroutine());
     }
@@ -36,14 +37,18 @@ public abstract class Turret : MonoBehaviour
     public void FixedUpdate()
     {
         List<Unit> units = __range.Units;
-        if(units.Count > 0)
+        if (units.Count > 0)
         {
             Unit unit = units[0];
 
             // face the first unit
             LookAt(unit.transform);
 
-
+            __attackVisual.Attacking = true;
+        }
+        else
+        {
+            __attackVisual.Attacking = false;
         }
     }
 

@@ -18,7 +18,7 @@ public class PathFollower : MonoBehaviour
         this.path = path;
     }
 
-    void FixedUpdate()
+    public virtual void FixedUpdate()
     {
         path.UpdateTransformAtDistance(this.transform, _distance);
         _distance += .0001f * _speed * Time.deltaTime;
