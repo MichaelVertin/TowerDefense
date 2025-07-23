@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using static UnityEngine.Rendering.DebugUI;
 
 public class TurretFactory : MonoBehaviour
@@ -8,11 +9,19 @@ public class TurretFactory : MonoBehaviour
     [SerializeField] private Turret __turretPrefab;
     [SerializeField] private int __initialCost = 100;
     private int __currentCost;
+    private Outline __outline;
+
+    public bool Selected
+    {
+        set { __outline.enabled = value; }
+    }
 
     private void Awake()
     {
         // set initial cost
         Cost = __initialCost;
+        __outline = GetComponent<Outline>();
+        Selected = false;
     }
 
 

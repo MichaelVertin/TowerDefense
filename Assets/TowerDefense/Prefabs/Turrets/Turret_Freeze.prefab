@@ -50,7 +50,7 @@ MonoBehaviour:
   fireRate: 0.5
   damage: 50
   slowDuration: 2
-  slowStrength: 0.5
+  slowStrength: 0.75
 --- !u!114 &4399087228225697163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,7 +63,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1edd8ba644c66da40af7551ef189f3b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  __particleSystems: []
 --- !u!1001 &587721369925760614
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -48,9 +48,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fireRate: 0.2
-  damage: 10
+  damage: 50
   burnDuration: 3
-  burnDamage: 100
+  burnDamage: 50
   burnFrequency: 0.5
 --- !u!114 &201967748875423183
 MonoBehaviour:
@@ -64,7 +64,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1edd8ba644c66da40af7551ef189f3b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  __particleSystems: []
 --- !u!1001 &1357753182507005145
 PrefabInstance:
   m_ObjectHideFlags: 0

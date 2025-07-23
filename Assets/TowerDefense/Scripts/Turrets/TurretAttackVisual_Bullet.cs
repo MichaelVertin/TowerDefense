@@ -1,8 +1,9 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class TurretAttackVisual_Bullet : TurretAttackVisual
 {
-    private WFX_LightFlicker lightEffect;
+    private List<WFX_LightFlicker> lightEffects;
 
     public override bool Attacking
     {
@@ -10,13 +11,16 @@ public class TurretAttackVisual_Bullet : TurretAttackVisual
         {
             // also set lightEffect
             base.Attacking = value;
-            lightEffect.Attacking = value;
+            foreach(WFX_LightFlicker lightEffect in lightEffects)
+            {
+                lightEffect.Attacking = value;
+            }
         }
     }
 
     public override void Awake()
     {
-        lightEffect = GetComponentInChildren<WFX_LightFlicker>();
+        lightEffects = new List<WFX_LightFlicker>(GetComponentsInChildren<WFX_LightFlicker>());
         base.Awake();
     }
 }

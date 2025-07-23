@@ -47,3 +47,6 @@ MonoBehaviour:
   paths: []
   wavePrefab: {fileID: 0}
   unitHeavyPrefab: {fileID: 8167651775051453101, guid: f9c3db00a5b7dd94fa8334b45cb9a855, type: 3}
+  unitDronePrefab: {fileID: 5379665257843244222, guid: e23809c95c4426c4a9c04f6d020b5ce7, type: 3}
+  unitMiniPrefab: {fileID: 4701577384260500653, guid: abc29fc66fac7f44e8f46f72fc2a2360, type: 3}
+  __waveProgressField: {fileID: 0}

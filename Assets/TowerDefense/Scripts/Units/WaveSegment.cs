@@ -1,84 +1,68 @@
-using System.Collections.Generic;
-using System;
-using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class WaveSegment : MonoBehaviour
 {
-    private int unitCount;
-    private float timeBetweenUnits;
-    private Unit unitToSpawn;
-    private UnitPath unitPath;
-    private bool __done = false;
+    [SerializeField] private Unit unitPrefab;
+    [SerializeField] private int unitCount;
+    [SerializeField] private float spawnInterval;
+    [SerializeField] private UnitPath path;
+    
+    private List<Unit> spawnedUnits = new List<Unit>();
+    private bool isSpawning = false;
+    private bool hasFinishedSpawning = false;
+    private bool hasStartedSpawning = false;
 
-    private List<Tuple<WaveSegment, float>> parallelWaves = new List<Tuple<WaveSegment, float>>();
-    private Tuple<WaveSegment, float> sequentialWave = null;
-
-    public void Init(UnitPath path, Unit unitToSpawn, int count, float timeBetweenSpawns)
+    public bool HasFinishedSpawning => hasFinishedSpawning;
+    public bool HasStartedSpawning => hasStartedSpawning;
+    public List<Unit> SpawnedUnits => spawnedUnits;
+    
+    public void Initialize(Unit unitPrefab, int unitCount, float spawnInterval, UnitPath path)
     {
-        this.unitToSpawn = unitToSpawn;
-        this.unitPath = path;
-        this.unitCount = count;
-        this.timeBetweenUnits = timeBetweenSpawns;
+        this.unitPrefab = unitPrefab;
+        this.unitCount = unitCount;
+        this.spawnInterval = spawnInterval;
+        this.path = path;
     }
-
-    public void Play(float delay = 0f)
+    
+    public void StartWaveSegment()
     {
-        StartCoroutine(PlayMainWave(delay));
-        foreach (Tuple<WaveSegment, float> wave in parallelWaves)
+        if (!isSpawning)
         {
-            wave.Item1.Play(delay + wave.Item2);
+            StartCoroutine(SpawnUnits());
         }
     }
-
-    public void AddSequentialWave(WaveSegment waveSegment, float delay = 0f)
+    
+    private IEnumerator SpawnUnits()
     {
-        if (sequentialWave != null)
+        isSpawning = true;
+        hasStartedSpawning = true;
+        
+        for (int i = 0; i < unitCount; i++)
         {
-            sequentialWave.Item1.AddSequentialWave(waveSegment, delay);
-            return;
+            SpawnUnit();
+            
+            if (i < unitCount - 1) // Don't wait after the last unit
+            {
+                yield return new WaitForSeconds(spawnInterval);
+            }
         }
-
-        sequentialWave = new Tuple<WaveSegment, float>(waveSegment, delay);
+        
+        hasFinishedSpawning = true;
+        isSpawning = false;
     }
-
-    public void AddParallelWave(WaveSegment waveSegment, float delay = 0f)
+    
+    private void SpawnUnit()
     {
-        parallelWaves.Add(new Tuple<WaveSegment, float>(waveSegment, delay));
+        Unit newUnit = Instantiate(unitPrefab);
+        newUnit.Init(path);
+        spawnedUnits.Add(newUnit);
     }
-
-    public bool Done()
+    
+    public bool AreAllUnitsDestroyed()
     {
-        // not done if main loop not done
-        if (!__done) return false;
-        // not done if the next wave is not done
-        if (sequentialWave != null)
-        {
-            return sequentialWave.Item1.Done();
-        }
-
-        // done if no sequential wave exists
-        return true;
-    }
-
-    private IEnumerator PlayMainWave(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-
-        for (int spawnCount = 0; spawnCount < unitCount; spawnCount++)
-        {
-            Unit unit = Instantiate<Unit>(unitToSpawn);
-            unit.Init(unitPath);
-
-            yield return new WaitForSeconds(timeBetweenUnits);
-        }
-
-        if (sequentialWave != null)
-        {
-            yield return new WaitForSeconds(sequentialWave.Item2);
-            sequentialWave.Item1.Play();
-        }
-        __done = true;
-        yield return null;
+        spawnedUnits.RemoveAll(unit => unit == null);
+        return spawnedUnits.Count == 0 && hasFinishedSpawning;
     }
 }

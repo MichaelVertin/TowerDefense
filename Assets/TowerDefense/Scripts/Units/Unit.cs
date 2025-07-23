@@ -6,8 +6,9 @@ using System.Linq;
 public abstract class Unit : PathFollower
 {
     [SerializeField] private float StartingHealth;
-    [SerializeField] protected float _health;
     [SerializeField] protected int _resourceValue;
+    [SerializeField] protected int _damage;
+    protected float _health;
 
     private HealthBar __healthBar;
 
@@ -40,10 +41,19 @@ public abstract class Unit : PathFollower
         }
     }
 
+    // Called when unit dies due to health loss
     public void OnDeath()
     {
-        Player.Resources += _resourceValue;
+        Player_TD.Resources += _resourceValue;
         Destroy(this.gameObject);
+    }
+
+    // Called when unit reaches end of path
+    public override void OnEndPath()
+    {
+        base.OnEndPath();
+        Destroy(this.gameObject);
+        Prefabs_TD.instance.UserBase.Health -= _damage;
     }
 
     #region Conditions

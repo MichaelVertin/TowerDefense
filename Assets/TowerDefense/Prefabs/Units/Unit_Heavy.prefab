@@ -48,10 +48,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   path: {fileID: 0}
-  _speed: 200
-  StartingHealth: 10000
+  _speed: 100
+  StartingHealth: 30000
   _health: 0
-  _resourceValue: 50
+  _resourceValue: 250
+  _damage: 200
 --- !u!1001 &4503201957942697245
 PrefabInstance:
   m_ObjectHideFlags: 0

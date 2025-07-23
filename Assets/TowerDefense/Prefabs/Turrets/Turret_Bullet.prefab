@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fireRate: 0.5
-  damage: 200
+  damage: 150
 --- !u!114 &8511891995622841970
 MonoBehaviour:
   m_ObjectHideFlags: 0

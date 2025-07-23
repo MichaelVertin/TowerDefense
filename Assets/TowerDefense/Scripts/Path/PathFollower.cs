@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PathFollower : MonoBehaviour
 {
-    [SerializeField] UnitPath path;
+    UnitPath path;
     [SerializeField] float _speed = 300f;
 
     protected float _distance = 0.0f;
@@ -16,11 +16,17 @@ public class PathFollower : MonoBehaviour
     public void Init(UnitPath path)
     {
         this.path = path;
+        path.UpdateTransformAtDistance(this, _distance);
     }
 
     public virtual void FixedUpdate()
     {
-        path.UpdateTransformAtDistance(this.transform, _distance);
-        _distance += .0001f * _speed * Time.deltaTime;
+        _distance += _speed * Time.deltaTime * .01f;
+        path.UpdateTransformAtDistance(this, _distance);
+    }
+
+    public virtual void OnEndPath()
+    {
+
     }
 }
