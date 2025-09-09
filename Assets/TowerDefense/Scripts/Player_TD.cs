@@ -28,32 +28,15 @@ public class Player_TD : MonoBehaviour
 
     public void Update()
     {
-        if(InputManager.WasLeftMouseButtonPressed)
-        {
-            if(InputManager.GetObjectUnderMouse<TurretPosition>(out TurretPosition turretPos))
-            {
-                if (turretPos.Turret == null)
-                {
-                    if(__selectedTurretFactory != null)
-                    {
-                        if(__selectedTurretFactory.Purchase(ref __resources, out Turret turret))
-                        {
-                            Resources = Resources; // update UI
-                            turretPos.SetTurret(turret);
-                        }
-                    }
-                }
-            }
-        }
+
     }
 
-    public static void SelectTurret(TurretFactory factory)
+    public static void PurchaseTurret(TurretFactory turretFactory, TurretPosition turretPos)
     {
-        if(__selectedTurretFactory)
+        if (turretFactory.Purchase(ref __resources, out Turret turret))
         {
-            __selectedTurretFactory.Selected = false;
+            Resources = Resources; // update UI
+            turretPos.SetTurret(turret);
         }
-        __selectedTurretFactory = factory;
-        __selectedTurretFactory.Selected = true;
     }
 }
