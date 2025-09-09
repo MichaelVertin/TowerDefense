@@ -54,4 +54,28 @@ public class TurretPosition : MonoBehaviour
         __turret.transform.parent = origParent;
         return true;
     }
+
+
+    private Color originalColor = Color.white;
+    private bool isSelected = false;
+    public void Select()
+    {
+        if (!isSelected)
+        {
+            Material mat = this.GetComponentInChildren<MeshRenderer>().material;
+            originalColor = mat.color;
+            mat.color = Color.red;
+            isSelected = true;
+        }
+    }
+
+    public void Unselect()
+    {
+        if(isSelected)
+        {
+            this.GetComponentInChildren<MeshRenderer>().material.color = originalColor;
+            isSelected = false;
+        }
+    }
 }
+

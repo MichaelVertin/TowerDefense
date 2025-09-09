@@ -1,8 +1,64 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor.UI;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
+
+
+public interface IRayCastWrapper
+{
+    public abstract Vector3 point { get; }
+    public abstract SearchType SearchObjectCollision<SearchType>();
+}
+
+public class RayCastWrapper_3D : IRayCastWrapper
+{
+    RaycastHit hit;
+    public RayCastWrapper_3D(RaycastHit hit)
+    {
+        this.hit = hit;
+    }
+    public Vector3 point { get { return hit.point; } }
+
+    public SearchType SearchObjectCollision<SearchType>()
+    {
+        Collider objectToSearch = hit.collider;
+        SearchType result = default(SearchType);
+        result = objectToSearch.GetComponent<SearchType>();
+        if (result == null)
+        {
+            result = objectToSearch.GetComponentInParent<SearchType>();
+        }
+        return result;
+    }
+}
+
+public class RayCastWrapper_Canvas : IRayCastWrapper
+{
+    RaycastResult rayHit;
+    public RayCastWrapper_Canvas(RaycastResult rayHit)
+    {
+        this.rayHit = rayHit;
+    }
+    // TODO: incomplete
+    public Vector3 point { get { Debug.LogWarning("InputManager.RayCastWrapper Incomplete"); return Vector3.zero; } }
+
+    public SearchType SearchObjectCollision<SearchType>()
+    {
+        GameObject objectToSearch = rayHit.gameObject;
+        SearchType result = default(SearchType);
+        result = objectToSearch.GetComponent<SearchType>();
+        if (result == null)
+        {
+            result = objectToSearch.GetComponentInParent<SearchType>();
+        }
+        return result;
+    }
+}
+
 
 
 // TODO: identify active camera
@@ -39,7 +95,7 @@ public class InputManager : MonoBehaviour
 
     public static bool GetObjectUnderMouse<SearchType>(out Vector3 result)
     {
-        if (GetRaycastHitUnderMouse<SearchType>(out RaycastHit hit))
+        if (GetRaycastHitUnderMouse<SearchType>(out IRayCastWrapper hit))
         {
             result = hit.point;
             return true;
@@ -54,11 +110,11 @@ public class InputManager : MonoBehaviour
     public static List<SearchType> GetObjectsUnderMouse<SearchType>()
     {
         List<SearchType> results = new List<SearchType>();
-        List<RaycastHit> hits = GetRaycastHitsUnderMouse<SearchType>();
+        List<IRayCastWrapper> hits = GetRaycastHitsUnderMouse<SearchType>();
 
-        foreach (RaycastHit raycastHit in hits)
+        foreach (IRayCastWrapper raycastHit in hits)
         {
-            results.Add(GetComponentBySearch<SearchType>(raycastHit.collider));
+            results.Add(raycastHit.SearchObjectCollision<SearchType>());
         }
 
         return results;
@@ -67,9 +123,9 @@ public class InputManager : MonoBehaviour
 
     public static bool GetObjectUnderMouse<SearchType>(out SearchType result)
     {
-        if (GetRaycastHitUnderMouse<SearchType>(out RaycastHit rayHit))
+        if (GetRaycastHitUnderMouse<SearchType>(out IRayCastWrapper rayHit))
         {
-            result = GetComponentBySearch<SearchType>(rayHit.collider);
+            result = rayHit.SearchObjectCollision<SearchType>();
             return true;
         }
 
@@ -79,9 +135,9 @@ public class InputManager : MonoBehaviour
 
     public static bool GetObjectUnderMouse<SearchType>(out SearchType outObject, out Vector3 outPoint)
     {
-        if (GetRaycastHitUnderMouse<SearchType>(out RaycastHit rayHit))
+        if (GetRaycastHitUnderMouse<SearchType>(out IRayCastWrapper rayHit))
         {
-            outObject = GetComponentBySearch<SearchType>(rayHit.collider);
+            outObject = rayHit.SearchObjectCollision<SearchType>();
             outPoint = rayHit.point;
             return true;
         }
@@ -91,29 +147,51 @@ public class InputManager : MonoBehaviour
         return false;
     }
 
-    public static List<RaycastHit> GetRaycastHitsUnderMouse<SearchType>()
+    public static List<IRayCastWrapper> GetRaycastHitsUnderMouse<SearchType>()
     {
-        List<RaycastHit> results = new List<RaycastHit>();
+        List<IRayCastWrapper> results = new List<IRayCastWrapper>();
 
+        /////////////////////// 3D Objects //////////////////////////////
         Ray rayOrigin = Camera.main.ScreenPointToRay(MousePosition);
         RaycastHit[] rayHits = Physics.RaycastAll(rayOrigin);
 
         foreach (RaycastHit hit in rayHits)
         {
-            SearchType searchAttempt = GetComponentBySearch<SearchType>(hit.collider);
+            RayCastWrapper_3D wrappedHit = new RayCastWrapper_3D(hit);
+            SearchType searchAttempt = wrappedHit.SearchObjectCollision<SearchType>();
 
             if (searchAttempt != null)
             {
-                results.Add(hit);
+                results.Add(new RayCastWrapper_3D(hit));
+            }
+        }
+
+        //////////////////////// 2D Canvas /////////////////////////////
+        PointerEventData pointerData = new PointerEventData(EventSystem.current)
+        {
+            position = MousePosition
+        };
+
+        List<RaycastResult> uiHits = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, uiHits);
+
+        foreach (RaycastResult uiHit in uiHits)
+        {
+            RayCastWrapper_Canvas wrappedHit = new RayCastWrapper_Canvas(uiHit);
+            SearchType searchAttempt = wrappedHit.SearchObjectCollision<SearchType>();
+
+            if (searchAttempt != null)
+            {
+                results.Add(new RayCastWrapper_Canvas(uiHit));
             }
         }
 
         return results;
     }
 
-    public static bool GetRaycastHitUnderMouse<SearchType>(out RaycastHit resultHit)
+    public static bool GetRaycastHitUnderMouse<SearchType>(out IRayCastWrapper resultHit)
     {
-        List<RaycastHit> raycastHits = GetRaycastHitsUnderMouse<SearchType>();
+        List<IRayCastWrapper> raycastHits = GetRaycastHitsUnderMouse<SearchType>();
 
         if (raycastHits.Count > 0)
         {
@@ -121,26 +199,11 @@ public class InputManager : MonoBehaviour
             return true;
         }
 
-        resultHit = default(RaycastHit);
+        resultHit = default(IRayCastWrapper);
 
         return false;
     }
     #endregion raycasts
-
-
-    public static SearchType GetComponentBySearch<SearchType>(Collider objectToSearch)
-    {
-        SearchType result = default(SearchType);
-
-        result = objectToSearch.GetComponent<SearchType>();
-
-        if( result == null )
-        {
-            result = objectToSearch.GetComponentInParent<SearchType>();
-        }
-
-        return result;
-    }
 
     public static bool WasKeyPressedThisFrame(string value)
     {
